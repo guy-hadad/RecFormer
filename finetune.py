@@ -300,9 +300,9 @@ def main():
             dev_metrics = eval(model, dev_loader, args)
             print(f'Epoch: {epoch}. Dev set: {dev_metrics}')
 
-            if dev_metrics['NDCG@10'] > best_target:
+            if dev_metrics['NDCG@1'] > best_target:
                 print('Save the best model.')
-                best_target = dev_metrics['NDCG@10']
+                best_target = dev_metrics['NDCG@1']
                 patient = 5
                 torch.save(model.state_dict(), path_ckpt)
             
@@ -325,9 +325,9 @@ def main():
             dev_metrics = eval(model, dev_loader, args)
             print(f'Epoch: {epoch}. Dev set: {dev_metrics}')
 
-            if dev_metrics['NDCG@10'] > best_target:
+            if dev_metrics['NDCG@1'] > best_target:
                 print('Save the best model.')
-                best_target = dev_metrics['NDCG@10']
+                best_target = dev_metrics['NDCG@1']
                 patient = 3
                 torch.save(model.state_dict(), path_ckpt)
             

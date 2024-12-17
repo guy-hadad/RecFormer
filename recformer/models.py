@@ -539,6 +539,7 @@ class RecformerForSeqRec(LongformerPreTrainedModel):
         if candidates is None:
             candidate_embeddings = self.item_embedding.weight.unsqueeze(0) # (1, num_items, hidden_size)
         else:
+            
             candidate_embeddings = self.item_embedding(candidates) # (batch_size, candidates, hidden_size)
         pooler_output = pooler_output.unsqueeze(1) # (batch_size, 1, hidden_size)
         return self.sim(pooler_output, candidate_embeddings)
@@ -557,7 +558,10 @@ class RecformerForSeqRec(LongformerPreTrainedModel):
                 return_dict: Optional[bool] = None,
                 candidates: Optional[torch.Tensor] = None, # candidate item ids
                 labels: Optional[torch.Tensor] = None, # target item ids
+                evaluation=False,
                 ):
+        
+        
 
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
@@ -580,6 +584,7 @@ class RecformerForSeqRec(LongformerPreTrainedModel):
         pooler_output = outputs.pooler_output # (bs, hidden_size)
 
         if labels is None:
+            print("no")
             return self.similarity_score(pooler_output, candidates)
 
         loss_fct = CrossEntropyLoss()
