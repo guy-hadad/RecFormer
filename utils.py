@@ -131,6 +131,8 @@ class Ranker(nn.Module):
             
             # Construct candidate set: true_item + negatives
             candidate_items = [true_item] + negatives
+
+            print(candidate_items)
             # Extract scores for these candidates
             candidate_scores = scores[i, candidate_items]
 
