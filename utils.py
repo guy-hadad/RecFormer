@@ -124,17 +124,19 @@ class Ranker(nn.Module):
         
         for i in range(batch_size):
             seq = labels[i].tolist()
+            print("seq", seq)
             true_item = seq[-1]  # The last item is the next item to predict
-            
+            print("true_item", true_item)
             # Exclude all items in the sequence from negative sampling
             negatives = self.sample_negatives(num_classes, seq, self.num_negatives)
-            
+            print("negatives", negatives)
             # Construct candidate set: true_item + negatives
             candidate_items = [true_item] + negatives
 
-            print(candidate_items)
+            print("candidate_items", candidate_items)
             # Extract scores for these candidates
             candidate_scores = scores[i, candidate_items]
+            print("candidate_scores", candidate_scores)
 
             # candidate_scores shape: [30] (1 + num_negatives)
             sampled_scores_list.append(candidate_scores)
