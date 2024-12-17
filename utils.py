@@ -83,6 +83,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 import random
 
+def get_last_non_zero(lst):
+    for item in reversed(lst):  # Iterate through the list in reverse
+        if item != 0:  # Check if the item is not 0
+            return item
+    return None
+
+
+
 MAX_VAL = 1e9
 
 class Ranker(nn.Module):
@@ -124,19 +132,19 @@ class Ranker(nn.Module):
         
         for i in range(batch_size):
             seq = labels[i].tolist()
-            print("seq", seq)
-            true_item = seq[-1]  # The last item is the next item to predict
-            print("true_item", true_item)
+            # print("seq", seq)
+            true_item = get_last_non_zero(seq)  # The last item is the next item to predict
+            # print("true_item", true_item)
             # Exclude all items in the sequence from negative sampling
             negatives = self.sample_negatives(num_classes, seq, self.num_negatives)
-            print("negatives", negatives)
+            # print("negatives", negatives)
             # Construct candidate set: true_item + negatives
             candidate_items = [true_item] + negatives
 
-            print("candidate_items", candidate_items)
+            # print("candidate_items", candidate_items)
             # Extract scores for these candidates
             candidate_scores = scores[i, candidate_items]
-            print("candidate_scores", candidate_scores)
+            # print("candidate_scores", candidate_scores)
 
             # candidate_scores shape: [30] (1 + num_negatives)
             sampled_scores_list.append(candidate_scores)
