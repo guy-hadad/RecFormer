@@ -584,7 +584,6 @@ class RecformerForSeqRec(LongformerPreTrainedModel):
         pooler_output = outputs.pooler_output # (bs, hidden_size)
 
         if labels is None:
-            print("no")
             return self.similarity_score(pooler_output, candidates)
 
         loss_fct = CrossEntropyLoss()
