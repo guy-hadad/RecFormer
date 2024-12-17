@@ -313,6 +313,80 @@ class FinetuneDataCollatorWithPadding:
         return features
 
 
+# @dataclass
+# class EvalDataCollatorWithPadding:
+
+#     tokenizer: RecformerTokenizer
+#     tokenized_items: Dict
+
+#     def __call__(self, batch_data: List[Dict[str, Union[int, List[int], List[List[int]], torch.Tensor]]]) -> Dict[str, torch.Tensor]:
+
+#         '''
+#         features: A batch of list of item ids
+#         1. sample training pairs
+#         2. convert item ids to item features
+#         3. mask tokens for mlm
+
+#         input_ids: (batch_size, seq_len)
+#         item_position_ids: (batch_size, seq_len)
+#         token_type_ids: (batch_size, seq_len)
+#         attention_mask: (batch_size, seq_len)
+#         global_attention_mask: (batch_size, seq_len)
+#         '''
+        
+#         batch_item_seq, labels = self.prepare_eval_data(batch_data)
+#         batch_feature = self.extract_features(batch_item_seq)
+#         batch_encode_features = self.encode_features(batch_feature)
+#         batch = self.tokenizer.padding(batch_encode_features, pad_to_max=False)
+
+#         for k, v in batch.items():
+#             batch[k] = torch.LongTensor(v)
+
+          
+#         labels = torch.LongTensor(labels)
+        
+#         return batch, labels
+
+#     def prepare_eval_data(self, batch_data):
+
+#         batch_item_seq = []
+#         labels = []
+
+#         for data_line in batch_data:
+
+#             item_ids = data_line['items']
+#             label = data_line['label']
+            
+#             batch_item_seq.append(item_ids)
+#             labels.append(label)
+
+#         return batch_item_seq, labels
+
+
+#     def extract_features(self, batch_item_seq):
+
+#         features = []
+
+#         for item_seq in batch_item_seq:
+#             feature_seq = []
+#             for item in item_seq:
+#                 input_ids, token_type_ids = self.tokenized_items[item]
+#                 feature_seq.append([input_ids, token_type_ids])
+#             features.append(feature_seq)
+
+#         return features
+
+#     def encode_features(self, batch_feature):
+        
+#         features = []
+#         for feature in batch_feature:
+#             features.append(self.tokenizer.encode(feature, encode_item=False))
+
+#         return features
+
+
+
+
 @dataclass
 class EvalDataCollatorWithPadding:
 
@@ -320,66 +394,67 @@ class EvalDataCollatorWithPadding:
     tokenized_items: Dict
 
     def __call__(self, batch_data: List[Dict[str, Union[int, List[int], List[List[int]], torch.Tensor]]]) -> Dict[str, torch.Tensor]:
-
         '''
         features: A batch of list of item ids
         1. sample training pairs
         2. convert item ids to item features
         3. mask tokens for mlm
 
-        input_ids: (batch_size, seq_len)
-        item_position_ids: (batch_size, seq_len)
-        token_type_ids: (batch_size, seq_len)
-        attention_mask: (batch_size, seq_len)
-        global_attention_mask: (batch_size, seq_len)
+        Returns:
+            batch: Dictionary with keys like input_ids, attention_mask, etc.
+            labels: (batch_size, seq_len) padded labels tensor
         '''
-        
+
+        # Prepare data
         batch_item_seq, labels = self.prepare_eval_data(batch_data)
+
+        # Encode features
         batch_feature = self.extract_features(batch_item_seq)
         batch_encode_features = self.encode_features(batch_feature)
+
+        # Let the tokenizer handle item sequence padding
+        # pad_to_max=False indicates dynamic padding based on the max length in the current batch
         batch = self.tokenizer.padding(batch_encode_features, pad_to_max=False)
 
+        # Pad labels
+        max_label_len = max(len(l) for l in labels)
+        padded_labels = [
+            l + [0]*(max_label_len - len(l))  # Assuming '0' is the pad token for labels
+            for l in labels
+        ]
+
+        # Convert everything to tensors
         for k, v in batch.items():
             batch[k] = torch.LongTensor(v)
 
-          
-        labels = torch.LongTensor(labels)
-        
+        labels = torch.LongTensor(padded_labels)
+
         return batch, labels
 
     def prepare_eval_data(self, batch_data):
-
         batch_item_seq = []
         labels = []
 
         for data_line in batch_data:
-
             item_ids = data_line['items']
             label = data_line['label']
-            
             batch_item_seq.append(item_ids)
             labels.append(label)
 
         return batch_item_seq, labels
 
-
     def extract_features(self, batch_item_seq):
-
         features = []
-
         for item_seq in batch_item_seq:
             feature_seq = []
             for item in item_seq:
                 input_ids, token_type_ids = self.tokenized_items[item]
                 feature_seq.append([input_ids, token_type_ids])
             features.append(feature_seq)
-
         return features
 
     def encode_features(self, batch_feature):
-        
         features = []
         for feature in batch_feature:
             features.append(self.tokenizer.encode(feature, encode_item=False))
-
         return features
