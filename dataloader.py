@@ -47,8 +47,11 @@ class RecformerEvalDataset(Dataset):
 
     def __getitem__(self, index):
         user = self.users[index]
-        seq = self.user2train[user] if self.mode == "val" else self.user2train[user] + self.user2val[user]
-        label = self.user2val[user] if self.mode == "val" else self.user2test[user]
+        seq = self.user2val[user][:-1]
+        label = self.user2val[user]
+
+        # seq = self.user2val[user] if self.mode == "val" else self.user2train[user] + self.user2val[user]
+        # label = self.user2val[user] if self.mode == "val" else self.user2test[user]
         
         return seq, label
 

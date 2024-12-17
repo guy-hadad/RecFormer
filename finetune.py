@@ -39,6 +39,7 @@ tokenizer_glb: RecformerTokenizer = None
 def _par_tokenize_doc(doc):
     
     item_id, item_attr = doc
+    item_attr = {"Title":item_attr}
 
     input_ids, token_type_ids = tokenizer_glb.encode_item(item_attr)
 
@@ -83,10 +84,15 @@ def eval(model, dataloader, args):
 
         for k, v in batch.items():
             batch[k] = v.to(args.device)
+
+
         labels = labels.to(args.device)
 
         with torch.no_grad():
             scores = model(**batch)
+        # print("scores shape: ", scores.shape)
+        # print(labels)
+        # print("labels shape: ", labels.shape)
 
         res = ranker(scores, labels)
 
@@ -160,7 +166,7 @@ def main():
     parser.add_argument('--meta_file', type=str, default='meta_data.json')
 
     # data process
-    parser.add_argument('--preprocessing_num_workers', type=int, default=8, help="The number of processes to use for the preprocessing.")
+    parser.add_argument('--preprocessing_num_workers', type=int, default=1, help="The number of processes to use for the preprocessing.")
     parser.add_argument('--dataloader_num_workers', type=int, default=0)
 
     # model
@@ -169,8 +175,8 @@ def main():
     # train
     parser.add_argument('--num_train_epochs', type=int, default=16)
     parser.add_argument('--gradient_accumulation_steps', type=int, default=8)
-    parser.add_argument('--finetune_negative_sample_size', type=int, default=1000)
-    parser.add_argument('--metric_ks', nargs='+', type=int, default=[10, 50], help='ks for Metric@k')
+    parser.add_argument('--finetune_negative_sample_size', type=int, default=29)
+    parser.add_argument('--metric_ks', nargs='+', type=int, default=[1,3,10], help='ks for Metric@k')
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--learning_rate', type=float, default=5e-5)
     parser.add_argument('--weight_decay', type=float, default=0)
@@ -178,7 +184,7 @@ def main():
     parser.add_argument('--device', type=int, default=0)
     parser.add_argument('--fp16', action='store_true')
     parser.add_argument('--fix_word_embedding', action='store_true')
-    parser.add_argument('--verbose', type=int, default=3)
+    parser.add_argument('--verbose', type=int, default=1)
     
 
     args = parser.parse_args()
@@ -311,6 +317,7 @@ def main():
     patient = 3
 
     for epoch in range(args.num_train_epochs):
+
 
         train_one_epoch(model, train_loader, optimizer, scheduler, scaler, args)
         
