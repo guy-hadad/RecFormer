@@ -94,12 +94,20 @@ def eval(model, dataloader, args):
         res = ranker(scores, labels)
 
         metrics = {}
-        for i, k in enumerate(args.metric_ks):
-            metrics["Recall@%d" % k] = res[2*i]
-            metrics["NDCG@%d" % k] = res[2*i+1]
-        metrics["MRR@3"] = res[-4]
-        metrics["MRR@10"] = res[-3]
-        metrics["AUC"] = res[-2]
+        # for i, k in enumerate(args.metric_ks):
+        #     metrics["Recall@%d" % k] = res[2*i]
+        #     metrics["NDCG@%d" % k] = res[2*i+1]
+        # metrics["MRR@3"] = res[-4]
+        # metrics["MRR@10"] = res[-3]
+        # metrics["AUC"] = res[-2]
+        metrics["Recall@1"] = res[0]
+        metrics["NDCG@1"] = res[1]
+        metrics["Recall@3"] = res[2]
+        metrics["NDCG@3"] = res[3]
+        metrics["Recall@10"] = res[4]
+        metrics["NDCG@10"] = res[5]
+        metrics["MRR@3"] = res[6]
+        metrics["MRR@10"] = res[7]
 
         for k, v in metrics.items():
             average_meter_set.update(k, v)
