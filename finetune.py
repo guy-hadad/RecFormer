@@ -40,9 +40,10 @@ def _par_tokenize_doc(doc):
     
     item_id, item_attr = doc
     item_attr = {"Title":item_attr}
-    print(item_attr)
-
-    input_ids, token_type_ids = tokenizer_glb.encode_item(item_attr)
+    try:
+        input_ids, token_type_ids = tokenizer_glb.encode_item(item_attr)
+    except:
+        print("problem", item_attr)
 
     return item_id, input_ids, token_type_ids
 
