@@ -90,17 +90,15 @@ def eval(model, dataloader, args):
 
         with torch.no_grad():
             scores = model(**batch)
-        # print("scores shape: ", scores.shape)
-        # print(labels)
-        # print("labels shape: ", labels.shape)
 
         res = ranker(scores, labels)
 
         metrics = {}
         for i, k in enumerate(args.metric_ks):
-            metrics["NDCG@%d" % k] = res[2*i]
-            metrics["Recall@%d" % k] = res[2*i+1]
-        metrics["MRR"] = res[-3]
+            metrics["Recall@%d" % k] = res[2*i]
+            metrics["NDCG@%d" % k] = res[2*i+1]
+        metrics["MRR@3"] = res[-4]
+        metrics["MRR@10"] = res[-3]
         metrics["AUC"] = res[-2]
 
         for k, v in metrics.items():
@@ -300,9 +298,9 @@ def main():
             dev_metrics = eval(model, dev_loader, args)
             print(f'Epoch: {epoch}. Dev set: {dev_metrics}')
 
-            if dev_metrics['NDCG@1'] > best_target:
+            if dev_metrics['Recall@1'] > best_target:
                 print('Save the best model.')
-                best_target = dev_metrics['NDCG@1']
+                best_target = dev_metrics['Recall@1']
                 patient = 5
                 torch.save(model.state_dict(), path_ckpt)
             
@@ -325,9 +323,9 @@ def main():
             dev_metrics = eval(model, dev_loader, args)
             print(f'Epoch: {epoch}. Dev set: {dev_metrics}')
 
-            if dev_metrics['NDCG@1'] > best_target:
+            if dev_metrics['Recall@1'] > best_target:
                 print('Save the best model.')
-                best_target = dev_metrics['NDCG@1']
+                best_target = dev_metrics['Recall@1']
                 patient = 3
                 torch.save(model.state_dict(), path_ckpt)
             

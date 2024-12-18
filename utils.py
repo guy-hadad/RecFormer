@@ -105,6 +105,7 @@ class Ranker(nn.Module):
         self.ks = metrics_ks
         self.num_negatives = num_negatives
         self.ce = nn.CrossEntropyLoss()
+        self.mrr_ks = [3,10]  # Can be a list like [3, 5]
 
         if seed is not None:
             torch.manual_seed(seed)
@@ -185,8 +186,16 @@ class Ranker(nn.Module):
             res.append(ndcg_k)
 
         # MRR: mean(1/(rank+1))
-        mrr = (1.0 / (ranks + 1.0)).mean().item()
-        res.append(mrr)
+        if self.mrr_ks is not None:
+            for k in self.mrr_ks:
+                mask = ranks < k
+                reciprocal_ranks = (1.0 / (ranks + 1.0)) * mask.float()
+                mrr_k = reciprocal_ranks.mean().item()
+                res.append(mrr_k)
+        else:
+            # Standard MRR
+            mrr = (1.0 / (ranks + 1.0)).mean().item()
+            res.append(mrr)
 
         # Append loss
         res.append(loss)
