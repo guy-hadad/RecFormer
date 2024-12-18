@@ -43,7 +43,7 @@ def _par_tokenize_doc(doc):
     try:
         input_ids, token_type_ids = tokenizer_glb.encode_item(item_attr)
     except:
-        print("problem", item_attr)
+        item_attr = {"Title":"Unknown"}
         input_ids, token_type_ids = tokenizer_glb.encode_item(item_attr)
 
     return item_id, input_ids, token_type_ids
